@@ -9,7 +9,11 @@
     {% for job in jobs %}
         <div style="border:1px solid black; margin:10px; padding:10px;">
 
-            <h2>{{ job.post }}</h2>
+            <h2>
+                <a href="{% url 'job_detail' job.id %}">
+                    {{ job.post }}
+                </a>
+            </h2>
             <p><strong>Organization:</strong> {{ job.organization }}</p>
             <p>{{ job.description }}</p>
             <p><strong>Location:</strong> {{ job.location }}</p>
