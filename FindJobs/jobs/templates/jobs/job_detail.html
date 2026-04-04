@@ -15,7 +15,10 @@
     <p><strong>Posted by:</strong> {{ job.posted_by.username }}</p>
 
     <br>
-    <button>Apply</button>
+    <form method="POST">
+    {% csrf_token %}
+    <button type="submit">Apply</button>
+    </form>
 
     <br><br>
     <a href="/">⬅ Back to Home</a>
