@@ -1,27 +1,238 @@
-<!DOCTYPE html>
-<html>
-<head>
+{% load crispy_forms_tags %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Job Details</title>
-</head>
-<body>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="{% url 'home' %}" class="text-2xl font-bold text-blue-600"
+            >Job Portal</a
+          >
 
-    <h1>{{ job.post }}</h1>
+          <!-- Auth Navigation -->
+          <div class="flex items-center space-x-4">
+            {% if user.is_authenticated %}
+            <div class="flex items-center space-x-4">
+              <span class="text-gray-700">
+                Welcome, <strong>{{ user.username }}</strong>
+                {% if user.is_staff %}
+                <span
+                  class="ml-1 px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-semibold"
+                  >Employer</span
+                >
+                {% endif %}
+              </span>
+              {% if user.is_staff %}
+              <a
+                href="{% url 'staff_dashboard' %}"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 font-semibold"
+              >
+                Dashboard
+              </a>
+              {% endif %}
+              <a
+                href="{% url 'logout' %}"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-semibold"
+              >
+                Logout
+              </a>
+            </div>
+            {% else %}
+            <div class="flex items-center space-x-2">
+              <a
+                href="{% url 'login' %}"
+                class="px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors duration-200 font-semibold"
+              >
+                Sign In
+              </a>
+              <a
+                href="{% url 'register' %}"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
+              >
+                Register
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
 
-    <p><strong>Organization:</strong> {{ job.organization }}</p>
-    <p><strong>Description:</strong> {{ job.description }}</p>
-    <p><strong>Location:</strong> {{ job.location }}</p>
-    <p><strong>Work Hour:</strong> {{ job.work_hour }}</p>
-    <p><strong>Hourly Pay:</strong> {{ job.hourly_pay }}</p>
-    <p><strong>Posted by:</strong> {{ job.posted_by.username }}</p>
+    <!-- Main Content -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Display Messages -->
+      {% if messages %} {% for message in messages %}
+      <div
+        class="mb-4 p-4 rounded-lg {% if message.tags %}bg-green-50 border border-green-200 text-green-800{% else %}bg-blue-50 border border-blue-200 text-blue-800{% endif %}"
+      >
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %}
 
-    <br>
-    <form method="POST">
-    {% csrf_token %}
-    <button type="submit">Apply</button>
-    </form>
+      <!-- Back Button -->
+      <a
+        href="/"
+        class="inline-flex items-center text-blue-600 hover:text-blue-800 mb-8"
+      >
+        <svg
+          class="w-5 h-5 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        Back to Home
+      </a>
 
-    <br><br>
-    <a href="/">⬅ Back to Home</a>
+      <!-- Job Header -->
+      <div
+        class="bg-white rounded-lg shadow-md p-8 mb-8 border border-gray-200"
+      >
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">{{ job.post }}</h1>
+        <p class="text-xl text-gray-600">{{ job.organization }}</p>
+      </div>
 
-</body>
+      <!-- Job Details Grid -->
+      <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <!-- Location Card -->
+        <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+          <div class="flex items-center mb-2">
+            <svg
+              class="w-6 h-6 text-gray-400 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+              ></path>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+              ></path>
+            </svg>
+            <h3 class="text-sm font-semibold text-gray-500 uppercase">
+              Location
+            </h3>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">{{ job.location }}</p>
+        </div>
+
+        <!-- Work Hour Card -->
+        <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+          <div class="flex items-center mb-2">
+            <svg
+              class="w-6 h-6 text-gray-400 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 1m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <h3 class="text-sm font-semibold text-gray-500 uppercase">Hours</h3>
+          </div>
+          <p class="text-2xl font-bold text-gray-900">{{ job.work_hour }}</p>
+        </div>
+
+        <!-- Hourly Pay Card -->
+        <div class="bg-white rounded-lg shadow p-6 border border-gray-200">
+          <div class="flex items-center mb-2">
+            <svg
+              class="w-6 h-6 text-gray-400 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <h3 class="text-sm font-semibold text-gray-500 uppercase">
+              Hourly Rate
+            </h3>
+          </div>
+          <p class="text-2xl font-bold text-green-600">
+            BDT{{ job.hourly_pay }}/hr
+          </p>
+        </div>
+      </div>
+
+      <!-- Description Section -->
+      <div
+        class="bg-white rounded-lg shadow-md p-8 mb-8 border border-gray-200"
+      >
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Job Description</h2>
+        <p class="text-gray-700 leading-relaxed text-lg mb-6">
+          {{ job.description }}
+        </p>
+        <div class="border-t border-gray-200 pt-6">
+          <p class="text-gray-600">
+            <span class="font-semibold text-gray-900">Posted by:</span> {{
+            job.posted_by.username }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Apply Button -->
+      <div class="bg-white rounded-lg shadow-md p-8 border border-gray-200">
+        {% if user.is_authenticated %}
+        <form method="POST">
+          {% csrf_token %}
+          <button
+            type="submit"
+            class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-bold text-lg"
+          >
+            Apply for this Job
+          </button>
+        </form>
+        {% else %}
+        <div class="text-center">
+          <p class="text-gray-600 mb-4 text-lg">
+            Please sign in to apply for this job
+          </p>
+          <div class="flex gap-4 justify-center">
+            <a
+              href="{% url 'login' %}"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold"
+            >
+              Sign In
+            </a>
+            <a
+              href="{% url 'register' %}"
+              class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200 font-semibold"
+            >
+              Create Account
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </body>
 </html>

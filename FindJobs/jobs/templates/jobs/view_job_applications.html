@@ -1,0 +1,197 @@
+{% load crispy_forms_tags %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Applications - Job Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="{% url 'home' %}" class="text-2xl font-bold text-purple-600"
+            >Job Portal</a
+          >
+
+          <div class="flex items-center space-x-4">
+            <span class="text-gray-700">
+              <strong>{{ user.username }}</strong>
+            </span>
+            <a
+              href="{% url 'logout' %}"
+              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-semibold"
+            >
+              Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <!-- Back Button -->
+      <a
+        href="{% url 'staff_dashboard' %}"
+        class="inline-flex items-center text-purple-600 hover:text-purple-800 mb-8"
+      >
+        <svg
+          class="w-5 h-5 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        Back to Dashboard
+      </a>
+
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">
+          Applications for: {{ job.post }}
+        </h1>
+        <div class="flex items-center gap-4 text-gray-600">
+          <span>{{ job.organization }}</span>
+          <span
+            class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-semibold"
+          >
+            {{ applications.count }} Application{{ applications.count|pluralize
+            }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Job Details Card -->
+      <div class="bg-white rounded-lg shadow p-6 border border-gray-200 mb-8">
+        <div class="grid md:grid-cols-4 gap-4">
+          <div>
+            <p class="text-sm text-gray-600 mb-1">Location</p>
+            <p class="font-semibold text-gray-900">{{ job.location }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 mb-1">Work Hour</p>
+            <p class="font-semibold text-gray-900">{{ job.work_hour }}</p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 mb-1">Hourly Pay</p>
+            <p class="font-semibold text-green-600">
+              BDT{{ job.hourly_pay }}/hr
+            </p>
+          </div>
+          <div>
+            <p class="text-sm text-gray-600 mb-1">Posted By</p>
+            <p class="font-semibold text-gray-900">
+              {{ job.posted_by.username }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Applications Table -->
+      <div
+        class="bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
+      >
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-900">Applications</h2>
+        </div>
+
+        {% if applications %}
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-sm font-semibold text-gray-700"
+                >
+                  Applicant Name
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-sm font-semibold text-gray-700"
+                >
+                  Email
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-sm font-semibold text-gray-700"
+                >
+                  Applied On
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-sm font-semibold text-gray-700"
+                >
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for application in applications %}
+              <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                <td class="px-6 py-4 text-sm text-gray-900 font-semibold">
+                  {{ application.applicant.username }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  {{ application.applicant.email }}
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600">
+                  <span class="text-xs text-gray-500"
+                    >{{ application.applied_at|date:"M d, Y H:i" }}</span
+                  >
+                </td>
+                <td class="px-6 py-4 text-sm">
+                  <span
+                    class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold"
+                  >
+                    Applied
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="px-6 py-12 text-center">
+          <svg
+            class="w-16 h-16 text-gray-300 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4.354a4 4 0 110 8.646 4 4 0 010-8.646M9 14.5v2.5a2 2 0 004 0v-2.5"
+            />
+          </svg>
+          <p class="text-gray-500 text-lg">No applications yet</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 flex gap-4 justify-center">
+        <a
+          href="{% url 'edit_job' job.id %}"
+          class="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors duration-200 font-semibold"
+        >
+          Edit Job
+        </a>
+        <a
+          href="{% url 'delete_job' job.id %}"
+          class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-semibold"
+        >
+          Delete Job
+        </a>
+      </div>
+    </div>
+  </body>
+</html>
