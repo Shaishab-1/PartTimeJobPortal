@@ -1,362 +1,124 @@
-{% load crispy_forms_tags %}
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Applicant Details - Job Portal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-          <a href="{% url 'home' %}" class="text-2xl font-bold text-purple-600"
-            >Job Portal</a
-          >
+{% extends 'jobs/base.html' %}
 
-          <div class="flex items-center space-x-4">
-            <span class="text-gray-700">
-              <strong>{{ user.username }}</strong>
-            </span>
-            <a
-              href="{% url 'logout' %}"
-              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 font-semibold"
-            >
-              Logout
-            </a>
-          </div>
-        </div>
-      </div>
-    </nav>
+{% block title %}Applicant Profile - {{ applicant.username }} - Job Portal{% endblock %}
 
-    <!-- Main Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <!-- Back Button -->
-      <a
-        href="{% url 'notifications' %}"
-        class="inline-flex items-center text-purple-600 hover:text-purple-800 mb-8"
-      >
-        <svg
-          class="w-5 h-5 mr-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"
-          ></path>
-        </svg>
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <!-- Navigation Back -->
+    <a href="{% url 'notifications' %}" class="inline-flex items-center text-sm font-bold text-gray-500 hover:text-blue-600 mb-10 transition-colors">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Back to Notifications
-      </a>
+    </a>
 
-      <!-- Main Card -->
-      <div
-        class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden"
-      >
-        <!-- Header with Job Info -->
-        <div
-          class="bg-gradient-to-r from-purple-50 to-indigo-50 p-8 border-b border-gray-200"
-        >
-          <h1 class="text-3xl font-bold text-gray-900 mb-2">
-            Application Details
-          </h1>
-          <div class="flex items-center gap-4 mt-6">
-            <div
-              class="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold"
-            >
-              {{ application.get_status_display|upper }}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <!-- Sidebar: Applicant Identity -->
+        <div class="lg:col-span-1 space-y-8">
+            <div class="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 p-10 text-center">
+                <div class="w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2rem] flex items-center justify-center mx-auto mb-6 text-white text-3xl font-black shadow-xl shadow-blue-200">
+                    {{ applicant.username|slice:":1"|upper }}
+                </div>
+                <h2 class="text-3xl font-black text-gray-900 mb-1">{{ applicant.username }}</h2>
+                <p class="text-gray-400 font-bold mb-8 italic">Candidate ID: #{{ applicant.id }}</p>
+                
+                <div class="space-y-4 pt-8 border-t border-gray-50">
+                    <a href="mailto:{{ applicant.email }}" class="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gray-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        Send Email
+                    </a>
+                </div>
             </div>
-            <p class="text-gray-600">
-              Applied for:
-              <span class="font-bold text-gray-900">{{ job.post }}</span>
-            </p>
-          </div>
-        </div>
 
-        <!-- Content -->
-        <div class="p-8">
-          <!-- Application Timeline -->
-          <div class="mb-8 pb-8 border-b border-gray-200">
-            <h2 class="text-2xl font-bold text-gray-900 mb-4">
-              Application Timeline
-            </h2>
-            <div class="space-y-4">
-              <div class="flex items-center gap-4">
-                <div
-                  class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0"
-                >
-                  <svg
-                    class="w-6 h-6 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M12 8v4l3 1m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                </div>
-                <div>
-                  <p class="font-semibold text-gray-900">Applied</p>
-                  <p class="text-sm text-gray-600">
-                    {{ application.applied_at|date:"F d, Y \a\t H:i" }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Applicant Information -->
-          <div class="mb-8 pb-8 border-b border-gray-200">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">
-              Applicant Information
-            </h2>
-
-            <div class="grid md:grid-cols-2 gap-8">
-              <!-- Personal Info -->
-              <div>
-                <h3
-                  class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2"
-                >
-                  <svg
-                    class="w-5 h-5 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    ></path>
-                  </svg>
-                  Personal Info
-                </h3>
-                <div class="space-y-4">
-                  <div>
-                    <label class="text-sm text-gray-600 font-semibold"
-                      >Full Name</label
-                    >
-                    <p class="text-gray-900 font-semibold mt-1">
-                      {{ applicant.first_name|default:applicant.username }}
-                    </p>
-                  </div>
-                  <div>
-                    <label class="text-sm text-gray-600 font-semibold"
-                      >Username</label
-                    >
-                    <p class="text-gray-900 font-semibold mt-1">
-                      {{ applicant.username }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Contact Info -->
-              <div>
-                <h3
-                  class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2"
-                >
-                  <svg
-                    class="w-5 h-5 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    ></path>
-                  </svg>
-                  Contact Information
-                </h3>
-                <div class="space-y-4">
-                  <div>
-                    <label class="text-sm text-gray-600 font-semibold"
-                      >Email Address</label
-                    >
-                    <div class="mt-2 flex items-center gap-3">
-                      <p class="text-gray-900 font-semibold break-all">
-                        {{ applicant.email }}
-                      </p>
-                      <a
-                        href="mailto:{{ applicant.email }}"
-                        class="flex-shrink-0 w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 transition-colors"
-                        title="Send email"
-                      >
-                        <svg
-                          class="w-5 h-5"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
-                          ></path>
-                          <path
-                            d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
-                          ></path>
-                        </svg>
-                      </a>
+            <!-- Status Manager -->
+            <div class="bg-white rounded-[2.5rem] shadow-xl border border-gray-50 p-10">
+                <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Manage Pipeline</h3>
+                {% if user.is_staff %}
+                <form method="POST" action="{% url 'update_application_status' application.id %}" class="space-y-6">
+                    {% csrf_token %}
+                    <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                    
+                    <div class="space-y-2">
+                        <label class="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Update Status</label>
+                        <select name="status" class="w-full px-6 py-4 bg-gray-50 border-2 border-transparent rounded-2xl focus:bg-white focus:border-blue-500 outline-none transition-all font-bold text-gray-900 appearance-none cursor-pointer shadow-inner">
+                            <option value="pending" {% if application.status == "pending" %}selected{% endif %}>Pending Review</option>
+                            <option value="approved" {% if application.status == "approved" %}selected{% endif %}>Approve Selection</option>
+                            <option value="rejected" {% if application.status == "rejected" %}selected{% endif %}>Discontinue Application</option>
+                        </select>
                     </div>
-                  </div>
+
+                    <button type="submit" class="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+                        Process Decission
+                    </button>
+                </form>
+                {% else %}
+                <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100">
+                    <p class="text-blue-700 font-bold text-sm text-center">Your application is currently being reviewed by the employer.</p>
                 </div>
-              </div>
+                {% endif %}
             </div>
-          </div>
-
-          <!-- Job Information -->
-          <div class="mb-8 pb-8 border-b border-gray-200">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">
-              Job Information
-            </h2>
-
-            <div class="grid md:grid-cols-2 gap-8">
-              <div>
-                <label class="text-sm text-gray-600 font-semibold"
-                  >Job Position</label
-                >
-                <p class="text-gray-900 font-semibold mt-2 text-lg">
-                  {{ job.post }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm text-gray-600 font-semibold"
-                  >Organization</label
-                >
-                <p class="text-gray-900 font-semibold mt-2 text-lg">
-                  {{ job.organization }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm text-gray-600 font-semibold"
-                  >Location</label
-                >
-                <p class="text-gray-900 font-semibold mt-2">
-                  {{ job.location }}
-                </p>
-              </div>
-              <div>
-                <label class="text-sm text-gray-600 font-semibold"
-                  >Hourly Pay</label
-                >
-                <p class="text-green-600 font-bold mt-2 text-lg">
-                  BDT{{ job.hourly_pay }}/hr
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex gap-4">
-            <a
-              href="mailto:{{ applicant.email }}"
-              class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold text-center flex items-center justify-center gap-2"
-            >
-              <svg
-                class="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                ></path>
-              </svg>
-              Send Email
-            </a>
-
-            <!-- Status Update Form -->
-            <form
-              method="POST"
-              action="{% url 'update_application_status' application.id %}"
-              class="flex gap-2"
-            >
-              {% csrf_token %}
-              <input
-                type="hidden"
-                name="notification_id"
-                value="{{ notification.id }}"
-              />
-
-              <select
-                name="status"
-                class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              >
-                <option
-                  value="pending"
-                  {%
-                  if
-                  application.status=""
-                  ="pending"
-                  %}selected{%
-                  endif
-                  %}
-                >
-                  Pending
-                </option>
-                <option
-                  value="approved"
-                  {%
-                  if
-                  application.status=""
-                  ="approved"
-                  %}selected{%
-                  endif
-                  %}
-                >
-                  Approve
-                </option>
-                <option
-                  value="rejected"
-                  {%
-                  if
-                  application.status=""
-                  ="rejected"
-                  %}selected{%
-                  endif
-                  %}
-                >
-                  Reject
-                </option>
-              </select>
-              <button
-                type="submit"
-                class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
-              >
-                Update Status
-              </button>
-            </form>
-          </div>
         </div>
-      </div>
 
-      <!-- Quick Contact Card -->
-      <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Quick Contact</h3>
-        <p class="text-gray-700 mb-4">
-          Click below to send an email to the applicant:
-        </p>
-        <a
-          href="mailto:{{ applicant.email }}?subject=Regarding%20your%20application%20for%20{{ job.post }}"
-          class="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-        >
-          Contact {{ applicant.username }}
-        </a>
-      </div>
+        <!-- Main Content: Professional Profile -->
+        <div class="lg:col-span-2 space-y-12">
+            <!-- Job Context Header -->
+            <div class="bg-white rounded-[3rem] p-10 border border-gray-50 shadow-sm flex items-center justify-between">
+                <div>
+                    <h1 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Applying For</h1>
+                    <p class="text-2xl font-black text-gray-900 tracking-tight">{{ job.post }}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Organization</p>
+                    <p class="text-xl font-bold text-blue-600">{{ job.organization }}</p>
+                </div>
+            </div>
+
+            <!-- Professional Credentials -->
+            <div class="bg-white rounded-[3rem] shadow-2xl border border-gray-100 overflow-hidden">
+                <div class="p-10 sm:p-14 space-y-12">
+                    <!-- Core Attributes -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 pb-12 border-b border-gray-50">
+                        <div>
+                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Age</p>
+                            <p class="text-xl font-black text-gray-900">{{ applicant.profile.age|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-span-3">
+                            <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Verified Qualifications</p>
+                            <p class="text-xl font-black text-gray-900 leading-tight">{{ applicant.profile.qualifications|default:"No qualifications listed." }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Skills & Expertise -->
+                    <div>
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-8">Technical Expertise & Skills</h3>
+                        <div class="flex flex-wrap gap-3">
+                            {% for skill in applicant.profile.skills.split|slice:":20" %}
+                            <span class="px-5 py-3 bg-gray-50 text-gray-700 rounded-2xl font-bold text-sm border border-gray-100 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                                {{ skill|cut:"," }}
+                            </span>
+                            {% empty %}
+                            <p class="text-gray-400 italic">No specific skills highlighted.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Professional Bio -->
+                    <div>
+                        <h3 class="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-8">Professional Background</h3>
+                        <div class="bg-gray-50/50 rounded-[2rem] p-8 border border-gray-50 italic text-gray-700 leading-relaxed text-lg">
+                            "{{ applicant.profile.professional_details|default:"Candidate has not provided extended background details yet." }}"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Stats -->
+                <div class="bg-gray-900 px-10 py-6 flex items-center justify-between text-white">
+                    <div class="flex items-center gap-3">
+                        <span class="w-3 h-3 bg-blue-500 rounded-full"></span>
+                        <span class="text-xs font-black uppercase tracking-widest opacity-60">Application Received</span>
+                    </div>
+                    <span class="text-xs font-bold">{{ application.applied_at|date:"F d, Y" }}</span>
+                </div>
+            </div>
+        </div>
     </div>
-  </body>
-</html>
+</div>
+{% endblock %}

@@ -3,7 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from .models import Job, Application, Notification
+from .models import Job, Application, Notification, Profile
+from .forms import ProfileUpdateForm
 
 def is_staff(user):
     return user.is_staff
@@ -54,6 +55,10 @@ def register(request):
             password=password1,
             is_staff=(user_type == 'staff')
         )
+        
+        # Create profile for the new user
+        Profile.objects.create(user=user)
+        
         messages.success(request, 'Account created successfully! Please login.')
         return redirect('login')
     
@@ -95,8 +100,16 @@ def logout_view(request):
 @login_required(login_url='login')
 def job_detail(request, id):
     job = get_object_or_404(Job, id=id)
+    
+    # Ensure profile exists for the user
+    profile, created = Profile.objects.get_or_create(user=request.user)
 
     if request.method == "POST":
+        # Check if profile is complete
+        if not profile.is_complete:
+            messages.error(request, 'Please complete your profile before applying for jobs.')
+            return redirect('profile_update')
+
         # check if user already applied
         already_applied = Application.objects.filter(
             job=job,
@@ -111,7 +124,7 @@ def job_detail(request, id):
             # Create notification for the job poster
             notification_message = f"New application from {request.user.username} for {job.post}"
             Notification.objects.create(
-                staff=job.posted_by,
+                recipient=job.posted_by,
                 application=application,
                 notification_type='new_application',
                 message=notification_message
@@ -122,7 +135,29 @@ def job_detail(request, id):
 
         return redirect('job_detail', id=id)
 
-    return render(request, 'jobs/job_detail.html', {'job': job})
+    # Fetch application status if it exists
+    application = Application.objects.filter(job=job, applicant=request.user).first()
+
+    return render(request, 'jobs/job_detail.html', {
+        'job': job, 
+        'profile_is_complete': profile.is_complete,
+        'user_application': application
+    })
+
+@login_required(login_url='login')
+def profile_update(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    
+    if request.method == 'POST':
+        form = ProfileUpdateForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your profile has been updated successfully!')
+            return redirect('home')
+    else:
+        form = ProfileUpdateForm(instance=profile)
+        
+    return render(request, 'jobs/profile.html', {'form': form})
 
 # Staff Views
 @login_required(login_url='login')
@@ -131,7 +166,7 @@ def staff_dashboard(request):
     """Staff dashboard showing posted jobs and applications"""
     user_jobs = Job.objects.filter(posted_by=request.user)
     applications = Application.objects.filter(job__posted_by=request.user)
-    notifications = Notification.objects.filter(staff=request.user)
+    notifications = Notification.objects.filter(recipient=request.user)
     unread_notifications = notifications.filter(is_read=False).count()
     
     context = {
@@ -241,10 +276,9 @@ def delete_job(request, job_id):
 
 # Notification Views
 @login_required(login_url='login')
-@user_passes_test(is_staff, login_url='home')
 def notifications(request):
-    """View all notifications for staff"""
-    user_notifications = Notification.objects.filter(staff=request.user)
+    """View all notifications for the current user"""
+    user_notifications = Notification.objects.filter(recipient=request.user)
     unread_count = user_notifications.filter(is_read=False).count()
     
     context = {
@@ -254,10 +288,9 @@ def notifications(request):
     return render(request, 'jobs/notifications.html', context)
 
 @login_required(login_url='login')
-@user_passes_test(is_staff, login_url='home')
 def view_applicant_detail(request, notification_id):
-    """View applicant details and contact information"""
-    notification = get_object_or_404(Notification, id=notification_id, staff=request.user)
+    """View applicant details or employer update details"""
+    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
     application = notification.application
     applicant = application.applicant
     job = application.job
@@ -267,6 +300,10 @@ def view_applicant_detail(request, notification_id):
         notification.is_read = True
         notification.save()
     
+    if not request.user.is_staff:
+        # Redirect job seekers to job detail to see their status
+        return redirect('job_detail', id=application.job.id)
+
     context = {
         'notification': notification,
         'application': application,
@@ -276,10 +313,9 @@ def view_applicant_detail(request, notification_id):
     return render(request, 'jobs/applicant_detail.html', context)
 
 @login_required(login_url='login')
-@user_passes_test(is_staff, login_url='home')
 def mark_notification_read(request, notification_id):
     """Mark notification as read"""
-    notification = get_object_or_404(Notification, id=notification_id, staff=request.user)
+    notification = get_object_or_404(Notification, id=notification_id, recipient=request.user)
     notification.is_read = True
     notification.save()
     return redirect('notifications')
@@ -287,7 +323,7 @@ def mark_notification_read(request, notification_id):
 @login_required(login_url='login')
 @user_passes_test(is_staff, login_url='home')
 def update_application_status(request, application_id):
-    """Update application status (approve/reject)"""
+    """Update application status (approve/reject) and notify applicant"""
     application = get_object_or_404(Application, id=application_id, job__posted_by=request.user)
     
     if request.method == 'POST':
@@ -296,12 +332,19 @@ def update_application_status(request, application_id):
             application.status = new_status
             application.save()
             
-            # Create notification for status update
+            # Create notification for the job seeker (applicant)
             status_label = dict(Application.STATUS_CHOICES).get(new_status)
             notification_type = 'application_approved' if new_status == 'approved' else 'application_rejected'
-            message = f"Your application for {application.job.post} has been {status_label.lower()}"
+            message = f"Your application for {application.job.post} has been {status_label.lower()}."
             
-            messages.success(request, f'Application status updated to {status_label}')
+            Notification.objects.create(
+                recipient=application.applicant,
+                application=application,
+                notification_type=notification_type,
+                message=message
+            )
+            
+            messages.success(request, f'Application status updated to {status_label} and applicant notified.')
             return redirect('view_applicant_detail', notification_id=request.POST.get('notification_id', 0))
     
-    return redirect('staff_dashboard')
+    return redirect('staff_dashboard')

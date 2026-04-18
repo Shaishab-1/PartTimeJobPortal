@@ -15,9 +15,12 @@ urlpatterns = [
     path('staff/job/<int:job_id>/edit/', views.edit_job, name='edit_job'),
     path('staff/job/<int:job_id>/delete/', views.delete_job, name='delete_job'),
     
+    # Profile URLs
+    path('profile/update/', views.profile_update, name='profile_update'),
+    
     # Notification URLs
-    path('staff/notifications/', views.notifications, name='notifications'),
-    path('staff/applicant/<int:notification_id>/', views.view_applicant_detail, name='view_applicant_detail'),
-    path('staff/notification/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/', views.notifications, name='notifications'),
+    path('applicant/<int:notification_id>/', views.view_applicant_detail, name='view_applicant_detail'),
+    path('notification/<int:notification_id>/read/', views.mark_notification_read, name='mark_notification_read'),
     path('staff/application/<int:application_id>/status/', views.update_application_status, name='update_application_status'),
 ]

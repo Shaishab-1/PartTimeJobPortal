@@ -1,0 +1,171 @@
+{% load crispy_forms_tags %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Job Portal{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+      body {
+        font-family: 'Outfit', sans-serif;
+      }
+      .glass-modal {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <a href="{% url 'home' %}" class="flex items-center space-x-2">
+            <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Job Portal</span>
+          </a>
+
+          <!-- Auth Navigation -->
+          <div class="flex items-center space-x-6">
+            {% if user.is_authenticated %}
+              <!-- Notification Bell -->
+              <a href="{% url 'notifications' %}" class="relative p-2 text-gray-500 hover:text-blue-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+                {% if unread_notifications_count > 0 %}
+                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                  {{ unread_notifications_count }}
+                </span>
+                {% endif %}
+              </a>
+
+              <div class="hidden md:flex items-center space-x-4">
+                <span class="text-sm text-gray-600">
+                  Hi, <span class="font-semibold text-gray-900">{{ user.username }}</span>
+                  {% if user.is_staff %}
+                    <span class="ml-1 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full font-bold">Employer</span>
+                  {% else %}
+                    <span class="ml-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-bold">Job Seeker</span>
+                  {% endif %}
+                </span>
+                
+                {% if not user.is_staff %}
+                  <a href="{% url 'profile_update' %}" class="text-sm font-semibold {% if user.profile.is_complete %}text-gray-600 hover:text-blue-600{% else %}text-red-600 hover:text-red-700{% endif %} transition-colors">
+                    Profile {% if not user.profile.is_complete %}(Incomplete!){% endif %}
+                  </a>
+                {% endif %}
+
+                {% if user.is_staff %}
+                <a href="{% url 'staff_dashboard' %}" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 font-bold shadow-sm">
+                  Dashboard
+                </a>
+                {% endif %}
+
+                <button onclick="toggleLogoutModal(true)" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all duration-200 font-bold border border-red-100">
+                  Logout
+                </button>
+              </div>
+            {% else %}
+              <div class="flex items-center space-x-3">
+                <a href="{% url 'login' %}" class="px-4 py-2 text-blue-600 font-bold hover:text-blue-700">Sign In</a>
+                <a href="{% url 'register' %}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-md font-bold">Get Started</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Post-Logout/Back-Navigation protection message -->
+    {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+      {% for message in messages %}
+      <div class="p-4 rounded-xl border {% if message.tags == 'success' %}bg-green-50 border-green-200 text-green-800{% elif message.tags == 'error' %}bg-red-50 border-red-200 text-red-800{% else %}bg-blue-50 border-blue-200 text-blue-800{% endif %} mb-4 animate-fade-in shadow-sm">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid md:grid-cols-3 gap-12 border-b border-gray-800 pb-12">
+          <div>
+            <h3 class="text-white font-bold text-xl mb-4">Job Portal</h3>
+            <p class="text-sm leading-relaxed">
+              Empowering job seekers and employers with the best-in-class part-time job matching platform.
+            </p>
+          </div>
+          <div>
+             <h4 class="text-white font-bold mb-4">Quick Links</h4>
+             <ul class="space-y-2 text-sm">
+               <li><a href="{% url 'home' %}" class="hover:text-white transition">Browse All Jobs</a></li>
+               <li><a href="#" class="hover:text-white transition">About Us</a></li>
+               <li><a href="#" class="hover:text-white transition">Contact Support</a></li>
+             </ul>
+          </div>
+          <div>
+             <h4 class="text-white font-bold mb-4">Newsletter</h4>
+             <div class="flex gap-2">
+               <input type="email" placeholder="Email address" class="bg-gray-800 border-none rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500">
+               <button class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition">Join</button>
+             </div>
+          </div>
+        </div>
+        <div class="pt-8 text-center text-xs">
+          <p>&copy; 2026 Job Portal Premium. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Logout Confirmation Modal -->
+    <div id="logoutModal" class="hidden fixed inset-0 z-[100] overflow-y-auto">
+      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true" onclick="toggleLogoutModal(false)">
+          <div class="absolute inset-0 bg-gray-900 opacity-75 backdrop-blur-sm"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom glass-modal rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-white/20">
+          <div class="p-8">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto bg-red-100 rounded-full mb-6">
+              <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+            </div>
+            <div class="text-center">
+              <h3 class="text-2xl font-bold text-gray-900 mb-2">Sign Out</h3>
+              <p class="text-gray-600 mb-8">Are you sure you want to sign out? Your session will be safely ended.</p>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button onclick="toggleLogoutModal(false)" class="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-all">Cancel</button>
+                <a href="{% url 'logout' %}" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-all shadow-lg text-center">Yes, Sign Out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function toggleLogoutModal(show) {
+        const modal = document.getElementById('logoutModal');
+        if (show) {
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        } else {
+          modal.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+        }
+      }
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

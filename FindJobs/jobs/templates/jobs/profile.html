@@ -1,0 +1,76 @@
+{% extends 'jobs/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Update Profile - Job Portal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="mb-12">
+        <h1 class="text-4xl font-black text-gray-900 mb-4 tracking-tight">Complete Your Profile</h1>
+        <p class="text-gray-500 text-lg">Your professional information helps employers understand your qualifications and skills better.</p>
+    </div>
+
+    <!-- Status Alert -->
+    {% if not user.profile.is_complete %}
+    <div class="mb-12 p-6 bg-amber-50 border-2 border-amber-200 rounded-3xl flex items-start gap-4">
+        <div class="bg-amber-100 p-3 rounded-2xl">
+            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+        </div>
+        <div>
+            <h4 class="text-lg font-bold text-amber-900 mb-1">Attention Required</h4>
+            <p class="text-amber-700 font-medium">To apply for jobs, you must fill in your <strong>Age, Qualifications, and Skills</strong>.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Profile Form -->
+    <div class="bg-white rounded-[2.5rem] shadow-2xl border border-gray-100 overflow-hidden">
+        <form method="POST" class="p-8 sm:p-12 space-y-8">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Age -->
+                <div class="md:col-span-1">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Age</label>
+                    {{ form.age }}
+                    {% if form.age.errors %}
+                        <p class="text-red-500 text-xs mt-2 font-bold">{{ form.age.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Empty space for grid alignment -->
+                <div class="hidden md:block"></div>
+
+                <!-- Qualifications -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Qualifications</label>
+                    {{ form.qualifications }}
+                    <p class="text-gray-400 text-xs mt-2 font-medium">List your degrees, certifications, or educational background.</p>
+                </div>
+
+                <!-- Skills -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Key Skills</label>
+                    {{ form.skills }}
+                    <p class="text-gray-400 text-xs mt-2 font-medium">Separate skills with commas (e.g. Graphic Design, Data Entry, Java).</p>
+                </div>
+
+                <!-- Professional Details -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3 ml-1">Additional Professional Details (Optional)</label>
+                    {{ form.professional_details }}
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-gray-100 flex items-center justify-between">
+                <p class="text-gray-400 text-sm font-bold italic">Your data is securely stored and only shared with prospective employers.</p>
+                <button type="submit" class="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200">
+                    Save Profile Settings
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
